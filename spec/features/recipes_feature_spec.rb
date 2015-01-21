@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 feature 'Managing Recipes', type: :feature do
+	given(:recipe) { FactoryGirl.create(:recipe) }
 	scenario 'creating a new recipe' do
 		visit 'recipes/new'
 
@@ -14,8 +15,8 @@ feature 'Managing Recipes', type: :feature do
 	end
 
 	scenario 'adding a category to a recipe' do
-		recipe = FactoryGirl.create(:recipe)
-		# recipe = Recipe.create!(title: 'toast dont care', instructions: 'burn it') #replaced by FactoryGirl recipe = create(:recipe)
+		# recipe = FactoryGirl.create(:recipe)
+		# recipe = Recipe.create!(title: 'toast dont care', instructions: 'burn it') #replaced by given FactoryGirl recipe = create(:recipe)
 		visit "recipes/#{recipe.id}/edit"
 		fill_in 'Category', with: 'BANANAS'
 
@@ -25,11 +26,52 @@ feature 'Managing Recipes', type: :feature do
 		end
 	end
 
-	# scenario 'showing a recipe' do
+	scenario 'showing a recipe' do
+		#calls factory girl, creates model, puts recipe data in database
+		# recipe = FactoryGirl.create(:recipe)
+		visit "recipes/#{recipe.id}"
 
-	# end
+		expect(page).to have_content recipe.title
+		expect(page).to have_content recipe.instructions
+		expect(page).to have_content recipe.category
+	end
 
-	# scenario 'updating a recipe'
+	scenario 'updating a recipe' do
+		# recipe = FactoryGirl.create(:recipe)
+		visit "recipes/#{recipe.id}/edit"
 
-	# scenario 'deleting a reicpe'
+		fill_in 'Title', with: 'SECRET_TITLE'
+		click_button 'Save'
+
+		expect(page).to have_content 'SECRET_TITLE'
+		expect(page).not_to have_content recipe.title
+	end
+
+	scenario 'deleting a reicpe' do
+		visit "recipes/#{recipe.id}"	
+		# recipe = FactoryGirl.create(:recipe)
+		# recipe.destroy
+
+		click_link 'Delete'
+		# expect(page).not_to have_content 
+		expect {
+			visit "/recipes/#{recipe.id}"
+		}.to raise_error ActiveRecord::RecordNotFound
+	end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
